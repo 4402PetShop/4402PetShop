@@ -24,7 +24,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { setEmail: setUserEmail, setName: setUserName } = useUser();
+const { setEmail: setUserEmail, setName: setUserName, setCustomerId } = useUser();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -62,12 +62,14 @@ export default function LoginScreen() {
       }
 
       const customer = data[0];
-      console.log('Logged in as customer:', customer);
+console.log('Logged in as customer:', customer);
 
       setUserEmail(customer.email);
-      setUserName(customer.name);
+        setUserName(customer.name);
+            setCustomerId(String(customer.customerid)); 
 
-      router.replace('/home');
+    router.replace('/home');
+
     } catch (err: any) {
       console.error('Unexpected login error:', err);
       Alert.alert('Error', 'Something went wrong while logging in.');

@@ -23,6 +23,7 @@ type Pet = {
   species: string;
   price: number;
   imageUrl: string;
+  
 };
 
 type SortOption = 'none' | 'priceLowHigh' | 'priceHighLow' | 'name';
@@ -71,7 +72,8 @@ export default function HomeScreen() {
 
         const { data, error } = await supabase
           .from('pet')
-          .select('petid, name, species, adoptionfee');
+           .select('petid, name, species, adoptionfee, adoptionstatus')
+           .eq('adoptionstatus', 'adopted');
 
         if (error) {
           console.error('Error loading pets:', error);
@@ -434,7 +436,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: '#FFFFFF',
-    marginRight: 12,
+    marginRight: 17,
   },
   cardImage: {
     width: '100%',
