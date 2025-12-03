@@ -8,8 +8,7 @@ export default function PaymentScreen() {
       <View style={styles.content}>
         <Text style={styles.title}>Payment</Text>
         <Text style={styles.text}>
-          This is the payment screen placeholder. Your teammates can hook the
-          real payment flow here later.
+          Put Payment Here
         </Text>
       </View>
       <BottomNav active="cart" />
