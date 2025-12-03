@@ -16,6 +16,7 @@ export default function RootLayout() {
       <Stack.Screen name="home" />
       <Stack.Screen name="cart" />
       <Stack.Screen name="payment" />
+      <Stack.Screen name="profile" />
       <Stack.Screen name="pet/[id]" />
     </Stack>
   );

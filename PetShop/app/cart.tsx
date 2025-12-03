@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   cardPrice: {
-    fontSize: 16,
+    fontSize: 1,
     fontWeight: '700',
   },
   removeButton: {
@@ -159,18 +159,19 @@ const styles = StyleSheet.create({
   },
   footer: {
     paddingHorizontal: 16,
-    paddingBottom: 90,
+    paddingBottom: 100,
   },
   continueButton: {
     backgroundColor: '#00756F',
     borderRadius: 12,
-    paddingVertical: 14,
+    paddingVertical: 18,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 20,
   },
   continueText: {
     color: '#FFFFFF',
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: '700',
   },
 });

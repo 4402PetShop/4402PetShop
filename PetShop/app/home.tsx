@@ -111,7 +111,7 @@ export default function HomeScreen() {
         activeOpacity={0.9}
 onPress={() =>
   router.push({
-    pathname: '/pet/[id]',
+    pathname: '/pet/id',
     params: {
       id: item.id,
       name: item.name,
@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     paddingTop: 32,
   },
   headerTitle: {
@@ -404,6 +404,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: '#FFFFFF',
+    marginRight: 26,
   },
   cardImage: {
     width: '100%',
@@ -413,7 +414,7 @@ const styles = StyleSheet.create({
   addButton: {
     position: 'absolute',
     top: 8,
-    right: 8,
+    right: 5,
     width: 28,
     height: 28,
     borderRadius: 14,

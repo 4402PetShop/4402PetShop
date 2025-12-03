@@ -1,3 +1,4 @@
+// app/pet/[id].tsx
 import React from 'react';
 import {
   View,
@@ -17,6 +18,8 @@ export default function PetDetailsScreen() {
     species?: string;
     price?: string;
     imageUrl?: string;
+    breed?: string;
+    fixed?: string; // "true" / "false" later if you want
   }>();
 
   const name = params.name ?? 'Animal Name';
@@ -26,8 +29,18 @@ export default function PetDetailsScreen() {
     params.imageUrl ??
     'https://images.pexels.com/photos/257540/pexels-photo-257540.jpeg?auto=compress&cs=tinysrgb&w=800';
 
+  // For now these can be placeholders; schema people can wire real values later
+  const breed = params.breed ?? 'Mixed Breed';
+  const ageText = '2 years'; // placeholder
+  const genderText = 'Female'; // placeholder
+  const fixedText =
+    params.fixed === 'true'
+      ? 'Yes (spayed / neutered)'
+      : 'No';
+
   return (
     <View style={styles.screen}>
+      {/* HEADER */}
       <View style={styles.headerRow}>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -36,7 +49,7 @@ export default function PetDetailsScreen() {
           <Ionicons name="chevron-back" size={22} color="#FFFFFF" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Pet Details</Text>
-        <View style={{ width: 32 }} />{/* spacer */}
+        <View style={{ width: 32 }} />
       </View>
 
       <ScrollView
@@ -44,10 +57,12 @@ export default function PetDetailsScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        {/* IMAGE CARD */}
         <View style={styles.imageCard}>
           <Image source={{ uri: imageUrl }} style={styles.image} />
         </View>
 
+        {/* NAME + SPECIES + PRICE */}
         <View style={styles.titleRow}>
           <View>
             <Text style={styles.name}>{name}</Text>
@@ -58,47 +73,45 @@ export default function PetDetailsScreen() {
           )}
         </View>
 
-        <View style={styles.infoRow}>
-          <View style={styles.infoChip}>
-            <Text style={styles.infoLabel}>Age</Text>
-            <Text style={styles.infoValue}>2 years</Text>
+        {/* DETAILS SECTION: this covers your schema fields */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Details</Text>
+
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Breed</Text>
+            <Text style={styles.detailValue}>{breed}</Text>
           </View>
-          <View style={styles.infoChip}>
-            <Text style={styles.infoLabel}>Gender</Text>
-            <Text style={styles.infoValue}>Female</Text>
+
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Age</Text>
+            <Text style={styles.detailValue}>{ageText}</Text>
           </View>
-          <View style={styles.infoChip}>
-            <Text style={styles.infoLabel}>Status</Text>
-            <Text style={styles.infoValue}>Available</Text>
+
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Gender</Text>
+            <Text style={styles.detailValue}>{genderText}</Text>
+          </View>
+
+          <View style={styles.detailRow}>
+            <Text style={styles.detailLabel}>Fixed</Text>
+            <Text style={styles.detailValue}>{fixedText}</Text>
           </View>
         </View>
 
+        {/* DESCRIPTION */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Description</Text>
           <Text style={styles.sectionText}>
             {name} is a friendly {species.toLowerCase()} looking for a loving
-            home. This is placeholder text—you can connect this screen to your
-            database later to show real health info, temperament, and other
-            details from your Pet table.
+            home.
           </Text>
         </View>
 
+        {/* HEALTH INFO */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Health Info</Text>
           <Text style={styles.sectionText}>
-            Vaccinations up to date. Spayed / neutered status and any special
-            needs can be displayed here.
-          </Text>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Adoption Fee</Text>
-          <Text style={styles.sectionText}>
-            {price !== undefined
-              ? `This pet's adoption fee is $${price.toFixed(
-                  2
-                )}. Fees help cover care, food, and medical costs.`
-              : 'Adoption fee will be listed here.'}
+            Vaccinations up to date.
           </Text>
         </View>
       </ScrollView>
@@ -108,7 +121,6 @@ export default function PetDetailsScreen() {
 
 const BG = '#001F22';
 const CARD = '#00343A';
-const TEAL = '#00756F';
 
 const styles = StyleSheet.create({
   screen: {
@@ -178,29 +190,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#FFFFFF',
   },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 8,
-    marginBottom: 16,
-  },
-  infoChip: {
-    flex: 1,
-    backgroundColor: CARD,
-    borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 10,
-  },
-  infoLabel: {
-    fontSize: 12,
-    color: '#A7D6D3',
-    marginBottom: 4,
-  },
-  infoValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
   section: {
     marginBottom: 16,
     backgroundColor: CARD,
@@ -216,5 +205,19 @@ const styles = StyleSheet.create({
   sectionText: {
     fontSize: 14,
     color: '#E0F4F3',
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  detailLabel: {
+    fontSize: 14,
+    color: '#A7D6D3',
+  },
+  detailValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
 });
