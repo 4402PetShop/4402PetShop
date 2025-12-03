@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,37 +6,108 @@ import {
   Image,
   ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { getAnimalPic } from '../animalPics';
+import { supabase } from '../../lib/supabase';
+
+type PetRow = {
+  petid: number;
+  name: string | null;
+  species: string | null;
+  breed: string | null;
+  age: string | null;         
+  gender: string | null;
+  isfixed: boolean | string | null;
+  generaldescription: string | null;
+  healthinfo: string | null;
+  adoptionfee: number | null;
+};
+
+const getImageForSpecies = (species: string | null): string => {
+  const s = (species ?? '').toLowerCase();
+
+  if (s.includes('fish')) {
+    return 'https://images.pexels.com/photos/128756/pexels-photo-128756.jpeg?auto=compress&cs=tinysrgb&w=800';
+  }
+
+  if (s.includes('dog')) {
+    return 'https://images.pexels.com/photos/257540/pexels-photo-257540.jpeg?auto=compress&cs=tinysrgb&w=800';
+  }
+
+  if (s.includes('cat')) {
+    return 'https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg?auto=compress&cs=tinysrgb&w=800';
+  }
+
+  if (s.includes('bird')) {
+    return 'https://images.pexels.com/photos/45851/bird-blue-cristata-cyanocitta-45851.jpeg?auto=compress&cs=tinysrgb&w=800';
+  }
+
+  return 'https://images.pexels.com/photos/5731866/pexels-photo-5731866.jpeg?auto=compress&cs=tinysrgb&w=800';
+};
 
 export default function PetDetailsScreen() {
-  const params = useLocalSearchParams<{
-    id: string;
-    name?: string;
-    species?: string;
-    price?: string;
-    imageUrl?: string;
-    breed?: string;
-    fixed?: string;
-  }>();
+  const { id } = useLocalSearchParams<{ id?: string }>();
+  const [pet, setPet] = useState<PetRow | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const name = params.name ?? 'Animal Name';
-  const speciesRaw = params.species ?? '';
-  const species = speciesRaw || 'Unknown Species';
-  const price = params.price ? Number(params.price) : undefined;
+  useEffect(() => {
+    if (!id) return;
 
-  const breed = params.breed ?? 'Mixed Breed';
-  const ageText = '2 years';
-  const genderText = 'Female';
+    const loadPet = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('pet')
+          .select(
+            'petid, name, species, breed, age, gender, isfixed, generaldescription, healthinfo, adoptionfee'
+          )
+          .eq('petid', Number(id))
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error loading pet details:', error);
+          return;
+        }
+
+        setPet(data as PetRow | null);
+      } catch (err) {
+        console.error('Unexpected error loading pet details:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPet();
+  }, [id]);
+
+  const name = pet?.name ?? 'Animal Name';
+  const species = pet?.species ?? 'Unknown Species';
+  const breed = pet?.breed ?? 'Unknown';
+  const ageText = pet?.age ?? 'Unknown';
+  const genderText = pet?.gender ?? 'Unknown';
+  const fixedRaw = pet?.isfixed;
   const fixedText =
-    params.fixed === 'true'
+    fixedRaw === true || fixedRaw === 'true'
       ? 'Yes (spayed / neutered)'
-      : 'No';
+      : fixedRaw === false || fixedRaw === 'false'
+      ? 'No'
+      : 'Unknown';
+  const description =
+    pet?.generaldescription ?? 'No description available for this pet yet.';
+  const healthInfo =
+    pet?.healthinfo ?? 'No health information has been recorded yet.';
+  const price =
+    pet?.adoptionfee !== null && pet?.adoptionfee !== undefined
+      ? pet.adoptionfee
+      : undefined;
+
+  const imageUrl = getImageForSpecies(pet?.species ?? null);
 
   return (
     <View style={styles.screen}>
+      {/* HEADER */}
       <View style={styles.headerRow}>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -48,69 +119,75 @@ export default function PetDetailsScreen() {
         <View style={{ width: 32 }} />
       </View>
 
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.imageCard}>
-          <Image
-            source={{ uri: getAnimalPic(speciesRaw) }}
-            style={styles.image}
-          />
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FFFFFF" />
+          <Text style={styles.loadingText}>Loading pet...</Text>
         </View>
-
-        <View style={styles.titleRow}>
-          <View>
-            <Text style={styles.name}>{name}</Text>
-            <Text style={styles.species}>{species}</Text>
-          </View>
-          {price !== undefined && (
-            <Text style={styles.price}>${price.toFixed(2)}</Text>
-          )}
+      ) : !pet ? (
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Pet not found.</Text>
         </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Details</Text>
-
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Breed</Text>
-            <Text style={styles.detailValue}>{breed}</Text>
+      ) : (
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* IMAGE CARD */}
+          <View style={styles.imageCard}>
+            <Image source={{ uri: imageUrl }} style={styles.image} />
           </View>
 
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Age</Text>
-            <Text style={styles.detailValue}>{ageText}</Text>
+          {/* NAME + SPECIES + PRICE */}
+          <View style={styles.titleRow}>
+            <View>
+              <Text style={styles.name}>{name}</Text>
+              <Text style={styles.species}>{species}</Text>
+            </View>
+            {price !== undefined && (
+              <Text style={styles.price}>${price.toFixed(2)}</Text>
+            )}
           </View>
 
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Gender</Text>
-            <Text style={styles.detailValue}>{genderText}</Text>
+          {/* DETAILS FROM SCHEMA */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Details</Text>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Breed</Text>
+              <Text style={styles.detailValue}>{breed}</Text>
+            </View>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Age</Text>
+              <Text style={styles.detailValue}>{ageText}</Text>
+            </View>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Gender</Text>
+              <Text style={styles.detailValue}>{genderText}</Text>
+            </View>
+
+            <View style={styles.detailRow}>
+              <Text style={styles.detailLabel}>Fixed</Text>
+              <Text style={styles.detailValue}>{fixedText}</Text>
+            </View>
           </View>
 
-          <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Fixed</Text>
-            <Text style={styles.detailValue}>{fixedText}</Text>
+          {/* DESCRIPTION */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Description</Text>
+            <Text style={styles.sectionText}>{description}</Text>
           </View>
-        </View>
 
-        {/* DESCRIPTION */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Description</Text>
-          <Text style={styles.sectionText}>
-            {name} is a friendly {species.toLowerCase()} looking for a loving
-            home.
-          </Text>
-        </View>
-
-        {/* HEALTH INFO */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Health Info</Text>
-          <Text style={styles.sectionText}>
-            Vaccinations up to date.
-          </Text>
-        </View>
-      </ScrollView>
+          {/* HEALTH INFO */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Health Info</Text>
+            <Text style={styles.sectionText}>{healthInfo}</Text>
+          </View>
+        </ScrollView>
+      )}
     </View>
   );
 }
@@ -144,6 +221,15 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     color: '#FFFFFF',
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    color: '#FFFFFF',
+    marginTop: 8,
   },
   scroll: {
     flex: 1,

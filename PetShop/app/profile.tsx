@@ -8,23 +8,28 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import BottomNav from './components/BottomNav';
+import { useUser } from './context/userContext';
 
 export default function ProfileScreen() {
+  const { email, name, setEmail, setName } = useUser();
+
   const handleChangePassword = () => {
     Alert.alert(
       'Change Password',
-      'This will go to the change password flow (UI only for now).'
+      'This is only a UI prototype – no real password system implemented.'
     );
   };
 
   const handleSignOut = () => {
+    setEmail(null);
+    setName(null);
     router.replace('/login');
   };
 
   const handleDeleteAccount = () => {
     Alert.alert(
       'Delete Account',
-      'This is only a UI prototype – no real delete happens yet.'
+      'This is only a UI prototype – no actual delete call yet.'
     );
   };
 
@@ -32,7 +37,13 @@ export default function ProfileScreen() {
     <View style={styles.screen}>
       <View style={styles.content}>
         <Text style={styles.title}>Profile</Text>
-        <Text style={styles.email}>Email: user@example.com</Text>
+
+        <Text style={styles.infoText}>
+          Name: {name ?? 'Unknown'}
+        </Text>
+        <Text style={styles.infoText}>
+          Email: {email ?? 'Unknown'}
+        </Text>
 
         <View style={styles.buttonGroup}>
           <TouchableOpacity
@@ -83,12 +94,13 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     marginBottom: 12,
   },
-  email: {
+  infoText: {
     fontSize: 16,
     color: '#FFFFFF',
-    marginBottom: 24,
+    marginBottom: 4,
   },
   buttonGroup: {
+    marginTop: 24,
     gap: 12,
   },
   primaryButton: {

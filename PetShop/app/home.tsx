@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,54 +13,86 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import BottomNav from './components/BottomNav';
-import { getAnimalPic } from './animalPics';
+import { supabase } from '../lib/supabase';
 
 type Pet = {
   id: string;
   name: string;
   species: string;
   price: number;
+  imageUrl: string;
 };
-
-const INITIAL_PETS: Pet[] = [
-  {
-    id: '1',
-    name: 'Goldie',
-    species: 'Fish',
-    price: 17.38,
-  },
-  {
-    id: '2',
-    name: 'Buddy',
-    species: 'Dog',
-    price: 67.41,
-  },
-  {
-    id: '3',
-    name: 'Luna',
-    species: 'Cat',
-    price: 45.99,
-  },
-   {
-    id: '4',
-    name: 'Sunny',
-    species: 'Bird',
-    price: 29.99,
-  },
-];
 
 type SortOption = 'none' | 'priceLowHigh' | 'priceHighLow' | 'name';
 
+const getImageForSpecies = (species: string): string => {
+  const s = species.toLowerCase();
+
+  if (s.includes('fish')) {
+    // Fish-specific image
+    return 'https://images.pexels.com/photos/128756/pexels-photo-128756.jpeg?auto=compress&cs=tinysrgb&w=800';
+  }
+
+  if (s.includes('dog')) {
+    return 'https://images.pexels.com/photos/257540/pexels-photo-257540.jpeg?auto=compress&cs=tinysrgb&w=800';
+  }
+
+  if (s.includes('cat')) {
+    return 'https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg?auto=compress&cs=tinysrgb&w=800';
+  }
+
+  if (s.includes('bird')) {
+    return 'https://images.pexels.com/photos/45851/bird-blue-cristata-cyanocitta-45851.jpeg?auto=compress&cs=tinysrgb&w=800';
+  }
+
+  // default fallback
+  return 'https://images.pexels.com/photos/5731866/pexels-photo-5731866.jpeg?auto=compress&cs=tinysrgb&w=800';
+};
+
+
 export default function HomeScreen() {
-  const [pets, setPets] = useState<Pet[]>(INITIAL_PETS);
+  const [pets, setPets] = useState<Pet[]>([]);
   const [cartIds, setCartIds] = useState<string[]>([]);
   const [searchText, setSearchText] = useState('');
-const [filterSpecies, setFilterSpecies] =
-  useState<'All' | 'Dog' | 'Cat' | 'Fish' | 'Bird'>('All');
+  const [filterSpecies, setFilterSpecies] = useState<'All' | 'Dog' | 'Cat' | 'Fish' | 'Bird'>('All');
   const [sortOption, setSortOption] = useState<SortOption>('none');
   const [filterVisible, setFilterVisible] = useState(false);
   const [sortVisible, setSortVisible] = useState(false);
-  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const loadPets = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('pet')
+          .select('petid, name, species, adoptionfee');
+
+        if (error) {
+          console.error('Error loading pets:', error);
+          return;
+        }
+
+        if (!data) return;
+
+        const mapped: Pet[] = data.map((row: any) => ({
+          id: String(row.petid),
+          name: row.name ?? 'Unnamed Pet',
+          species: row.species ?? 'Unknown',
+          price: row.adoptionfee ?? 0,
+          imageUrl: getImageForSpecies(row.species ?? ''),
+        }));
+
+        setPets(mapped);
+      } catch (err) {
+        console.error('Unexpected error loading pets:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPets();
+  }, []);
 
   const handleAddToCart = (id: string) => {
     setCartIds(prev => (prev.includes(id) ? prev : [...prev, id]));
@@ -69,15 +101,6 @@ const [filterSpecies, setFilterSpecies] =
   const isInCart = (id: string) => cartIds.includes(id);
 
   const handleLoadMore = () => {
-    setPets(prev => {
-      const nextPage = page + 1;
-      const extra = INITIAL_PETS.map(p => ({
-        ...p,
-        id: `${p.id}-p${nextPage}`,
-      }));
-      setPage(nextPage);
-      return [...prev, ...extra];
-    });
   };
 
   const filteredPets = useMemo(() => {
@@ -89,7 +112,7 @@ const [filterSpecies, setFilterSpecies] =
     }
 
     if (filterSpecies !== 'All') {
-      result = result.filter(p => p.species === filterSpecies);
+      result = result.filter(p => p.species.toLowerCase() === filterSpecies.toLowerCase());
     }
 
     if (sortOption === 'priceLowHigh') {
@@ -118,6 +141,7 @@ const [filterSpecies, setFilterSpecies] =
               name: item.name,
               species: item.species,
               price: String(item.price),
+              imageUrl: item.imageUrl,
             },
           })
         }
@@ -127,13 +151,13 @@ const [filterSpecies, setFilterSpecies] =
           <Text style={styles.cardPrice}>${item.price.toFixed(2)}</Text>
         </View>
 
-        <Image
-          source={{ uri: getAnimalPic(item.species) }}
-          style={styles.cardImage}
-        />
+        <Image source={{ uri: item.imageUrl }} style={styles.cardImage} />
 
         <TouchableOpacity
-          style={[styles.addButton, added && styles.addButtonAdded]}
+          style={[
+            styles.addButton,
+            added && styles.addButtonAdded,
+          ]}
           disabled={added}
           onPress={() => handleAddToCart(item.id)}
         >
@@ -189,12 +213,18 @@ const [filterSpecies, setFilterSpecies] =
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.4}
           showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            !loading ? (
+              <Text style={{ color: '#fff', marginTop: 20 }}>
+                No pets found.
+              </Text>
+            ) : null
+          }
         />
       </View>
 
       <BottomNav active="home" />
 
-      {/* Filter Modal */}
       <Modal
         visible={filterVisible}
         transparent
@@ -238,7 +268,6 @@ const [filterSpecies, setFilterSpecies] =
         </View>
       </Modal>
 
-      {/* Sort Modal */}
       <Modal
         visible={sortVisible}
         transparent
@@ -333,7 +362,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     paddingTop: 32,
   },
   headerTitle: {
@@ -380,7 +409,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   listContent: {
-    paddingBottom: 140, // room for bottom nav
+    paddingBottom: 140, 
   },
   cardContainer: {
     backgroundColor: CARD,
@@ -395,6 +424,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
+    paddingRight: 12,
   },
   cardTitle: {
     fontSize: 16,
@@ -405,7 +435,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: '#FFFFFF',
-    marginRight: 26,
+    marginRight: 17, 
   },
   cardImage: {
     width: '100%',
@@ -415,7 +445,7 @@ const styles = StyleSheet.create({
   addButton: {
     position: 'absolute',
     top: 8,
-    right: 5,
+    right: 8,
     width: 28,
     height: 28,
     borderRadius: 14,

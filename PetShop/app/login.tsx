@@ -11,24 +11,70 @@ import {
   Alert,
 } from 'react-native';
 import { router } from 'expo-router';
+import { supabase } from '../lib/supabase';
+
+import { useUser } from './context/userContext';
+
+const BG = '#001F22';
+const TEAL = '#00756F';
+const TEXT = '#FFFFFF';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-  if (!email || !password) {
-    Alert.alert('Missing info', 'Please fill out all fields.');
-    return;
-  }
+  const { setEmail: setUserEmail, setName: setUserName } = useUser();
 
-  if (email === '1234' && password === '1234') {
-    router.replace('/home');
-  } else {
-    Alert.alert('Login failed', 'Invalid email or password. Try 1234 / 1234.');
-  }
-};
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Missing info', 'Please enter email and password.');
+      return;
+    }
 
+    try {
+      setLoading(true);
+
+      const trimmedEmail = email.trim();
+
+      const { data, error } = await supabase
+        .from('customer')
+        .select('customerid, name, email, password')
+        .eq('email', trimmedEmail)
+        .eq('password', password)
+        .limit(2);
+
+      console.log('Supabase login rows:', data);
+      console.log('Supabase login error:', error);
+
+      if (error) {
+        Alert.alert('Login error', error.message);
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        Alert.alert('Login failed', 'Invalid email or password.');
+        return;
+      }
+
+      if (data.length > 1) {
+        console.warn('⚠️ Multiple customers with same email+password', data);
+      }
+
+      const customer = data[0];
+      console.log('Logged in as customer:', customer);
+
+      setUserEmail(customer.email);
+      setUserName(customer.name);
+
+      router.replace('/home');
+    } catch (err: any) {
+      console.error('Unexpected login error:', err);
+      Alert.alert('Error', 'Something went wrong while logging in.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleGoToSignUp = () => {
     router.replace('/signup');
@@ -68,8 +114,14 @@ export default function LoginScreen() {
             />
           </View>
 
-          <TouchableOpacity style={styles.button} onPress={handleLogin}>
-            <Text style={styles.buttonText}>Log In</Text>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleLogin}
+            disabled={loading}
+          >
+            <Text style={styles.buttonText}>
+              {loading ? 'Logging in...' : 'Log In'}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.footer} onPress={handleGoToSignUp}>
@@ -82,10 +134,6 @@ export default function LoginScreen() {
     </SafeAreaView>
   );
 }
-
-const BG = '#001F22';      
-const TEAL = '#00756F';
-const TEXT = '#FFFFFF';
 
 const styles = StyleSheet.create({
   safeArea: {
