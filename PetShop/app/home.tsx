@@ -13,13 +13,13 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import BottomNav from './components/BottomNav';
+import { getAnimalPic } from './animalPics';
 
 type Pet = {
   id: string;
   name: string;
   species: string;
   price: number;
-  imageUrl: string;
 };
 
 const INITIAL_PETS: Pet[] = [
@@ -28,24 +28,24 @@ const INITIAL_PETS: Pet[] = [
     name: 'Goldie',
     species: 'Fish',
     price: 17.38,
-    imageUrl:
-      'https://www.bing.com/images/search?view=detailV2&ccid=5hTIsVZz&id=5963B7078FC7E8C1CEEF48D683E4D98D0C1F8259&thid=OIP.5hTIsVZzcuPPU28aRAl3EAHaLG&mediaurl=https%3a%2f%2fimages.pexels.com%2fphotos%2f9870888%2fpexels-photo-9870888.jpeg%3fauto%3dcompress%26cs%3dtinysrgb%26dpr%3d1%26w%3d500&cdnurl=https%3a%2f%2fth.bing.com%2fth%2fid%2fR.e614c8b1567372e3cf536f1a44097710%3frik%3dWYIfDI3Z5IPWSA%26pid%3dImgRaw%26r%3d0&exph=749&expw=500&q=%27https%3a%2f%2fimages.pexels.com%2fphotos%2f161173%2fgoldfish-fish-aquarium-fish-fauna-161173.jpeg%3fauto%3dcompress%26cs%3dtinysrgb%26w%3d800%27%2c&FORM=IRPRST&ck=F72DDE9F0D189549A4F00994D14BA9B3&selectedIndex=10&itb=0',
   },
   {
     id: '2',
     name: 'Buddy',
     species: 'Dog',
     price: 67.41,
-    imageUrl:
-      'https://images.pexels.com/photos/257540/pexels-photo-257540.jpeg?auto=compress&cs=tinysrgb&w=800',
   },
   {
     id: '3',
     name: 'Luna',
     species: 'Cat',
     price: 45.99,
-    imageUrl:
-      'https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg?auto=compress&cs=tinysrgb&w=800',
+  },
+   {
+    id: '4',
+    name: 'Sunny',
+    species: 'Bird',
+    price: 29.99,
   },
 ];
 
@@ -55,7 +55,8 @@ export default function HomeScreen() {
   const [pets, setPets] = useState<Pet[]>(INITIAL_PETS);
   const [cartIds, setCartIds] = useState<string[]>([]);
   const [searchText, setSearchText] = useState('');
-  const [filterSpecies, setFilterSpecies] = useState<'All' | 'Dog' | 'Cat' | 'Fish'>('All');
+const [filterSpecies, setFilterSpecies] =
+  useState<'All' | 'Dog' | 'Cat' | 'Fish' | 'Bird'>('All');
   const [sortOption, setSortOption] = useState<SortOption>('none');
   const [filterVisible, setFilterVisible] = useState(false);
   const [sortVisible, setSortVisible] = useState(false);
@@ -109,31 +110,30 @@ export default function HomeScreen() {
       <TouchableOpacity
         style={styles.cardContainer}
         activeOpacity={0.9}
-onPress={() =>
-  router.push({
-    pathname: '/pet/id',
-    params: {
-      id: item.id,
-      name: item.name,
-      species: item.species,
-      price: String(item.price),
-      imageUrl: item.imageUrl,
-    },
-  })
-}
+        onPress={() =>
+          router.push({
+            pathname: '/pet/id',
+            params: {
+              id: item.id,
+              name: item.name,
+              species: item.species,
+              price: String(item.price),
+            },
+          })
+        }
       >
         <View style={styles.cardHeader}>
           <Text style={styles.cardTitle}>{item.name}</Text>
           <Text style={styles.cardPrice}>${item.price.toFixed(2)}</Text>
         </View>
 
-        <Image source={{ uri: item.imageUrl }} style={styles.cardImage} />
+        <Image
+          source={{ uri: getAnimalPic(item.species) }}
+          style={styles.cardImage}
+        />
 
         <TouchableOpacity
-          style={[
-            styles.addButton,
-            added && styles.addButtonAdded,
-          ]}
+          style={[styles.addButton, added && styles.addButtonAdded]}
           disabled={added}
           onPress={() => handleAddToCart(item.id)}
         >
@@ -194,6 +194,7 @@ onPress={() =>
 
       <BottomNav active="home" />
 
+      {/* Filter Modal */}
       <Modal
         visible={filterVisible}
         transparent
@@ -204,7 +205,7 @@ onPress={() =>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Filter By Species</Text>
 
-            {(['All', 'Dog', 'Cat', 'Fish'] as const).map(option => (
+            {(['All', 'Dog', 'Cat', 'Fish', 'Bird'] as const).map(option => (
               <Pressable
                 key={option}
                 style={[
@@ -379,7 +380,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   listContent: {
-    paddingBottom: 140, 
+    paddingBottom: 140, // room for bottom nav
   },
   cardContainer: {
     backgroundColor: CARD,
@@ -423,7 +424,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   addButtonAdded: {
-    backgroundColor: '#1DB954', 
+    backgroundColor: '#1DB954',
   },
   modalBackdrop: {
     flex: 1,

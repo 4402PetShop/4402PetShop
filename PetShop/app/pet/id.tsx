@@ -1,4 +1,3 @@
-// app/pet/[id].tsx
 import React from 'react';
 import {
   View,
@@ -10,6 +9,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { getAnimalPic } from '../animalPics';
 
 export default function PetDetailsScreen() {
   const params = useLocalSearchParams<{
@@ -19,20 +19,17 @@ export default function PetDetailsScreen() {
     price?: string;
     imageUrl?: string;
     breed?: string;
-    fixed?: string; // "true" / "false" later if you want
+    fixed?: string;
   }>();
 
   const name = params.name ?? 'Animal Name';
-  const species = params.species ?? 'Unknown Species';
+  const speciesRaw = params.species ?? '';
+  const species = speciesRaw || 'Unknown Species';
   const price = params.price ? Number(params.price) : undefined;
-  const imageUrl =
-    params.imageUrl ??
-    'https://images.pexels.com/photos/257540/pexels-photo-257540.jpeg?auto=compress&cs=tinysrgb&w=800';
 
-  // For now these can be placeholders; schema people can wire real values later
   const breed = params.breed ?? 'Mixed Breed';
-  const ageText = '2 years'; // placeholder
-  const genderText = 'Female'; // placeholder
+  const ageText = '2 years';
+  const genderText = 'Female';
   const fixedText =
     params.fixed === 'true'
       ? 'Yes (spayed / neutered)'
@@ -40,7 +37,6 @@ export default function PetDetailsScreen() {
 
   return (
     <View style={styles.screen}>
-      {/* HEADER */}
       <View style={styles.headerRow}>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -57,12 +53,13 @@ export default function PetDetailsScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* IMAGE CARD */}
         <View style={styles.imageCard}>
-          <Image source={{ uri: imageUrl }} style={styles.image} />
+          <Image
+            source={{ uri: getAnimalPic(speciesRaw) }}
+            style={styles.image}
+          />
         </View>
 
-        {/* NAME + SPECIES + PRICE */}
         <View style={styles.titleRow}>
           <View>
             <Text style={styles.name}>{name}</Text>
@@ -73,7 +70,6 @@ export default function PetDetailsScreen() {
           )}
         </View>
 
-        {/* DETAILS SECTION: this covers your schema fields */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Details</Text>
 

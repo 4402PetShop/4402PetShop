@@ -10,30 +10,17 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import BottomNav from './components/BottomNav';
+import { getAnimalPic } from './animalPics';
 
 type CartItem = {
   id: string;
   name: string;
+  species: string;
   price: number;
-  imageUrl: string;
 };
 
-const INITIAL_ITEMS: CartItem[] = [
-  {
-    id: '1',
-    name: 'Goldie',
-    price: 17.38,
-    imageUrl:
-      'https://images.pexels.com/photos/161173/goldfish-fish-aquarium-fish-fauna-161173.jpeg?auto=compress&cs=tinysrgb&w=800',
-  },
-  {
-    id: '2',
-    name: 'Buddy',
-    price: 67.41,
-    imageUrl:
-      'https://images.pexels.com/photos/257540/pexels-photo-257540.jpeg?auto=compress&cs=tinysrgb&w=800',
-  },
-];
+const INITIAL_ITEMS: CartItem[] = [];
+
 
 export default function CartScreen() {
   const [items, setItems] = useState<CartItem[]>(INITIAL_ITEMS);
@@ -59,7 +46,10 @@ export default function CartScreen() {
 
   const renderItem = ({ item }: { item: CartItem }) => (
     <View style={styles.card}>
-      <Image source={{ uri: item.imageUrl }} style={styles.cardImage} />
+      <Image
+        source={{ uri: getAnimalPic(item.species) }}
+        style={styles.cardImage}
+      />
       <View style={styles.cardInfo}>
         <Text style={styles.cardName}>{item.name}</Text>
         <Text style={styles.cardPrice}>${item.price.toFixed(2)}</Text>
@@ -80,19 +70,30 @@ export default function CartScreen() {
       </View>
 
       <View style={styles.listContainer}>
-        <FlatList
-          data={items}
-          keyExtractor={item => item.id}
-          renderItem={renderItem}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.listContent}
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.4}
-        />
+       <FlatList
+  data={items}
+  keyExtractor={item => item.id}
+  renderItem={renderItem}
+  showsVerticalScrollIndicator={false}
+  contentContainerStyle={styles.listContent}
+  onEndReached={handleLoadMore}
+  onEndReachedThreshold={0.4}
+  ListEmptyComponent={
+    <View style={styles.emptyContainer}>
+      <Text style={styles.emptyText}>Your cart is empty.</Text>
+      <Text style={styles.emptyTextSmall}>
+        Add pets from the Pet Search page.
+      </Text>
+    </View>
+  }
+/>
       </View>
 
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
+        <TouchableOpacity
+          style={styles.continueButton}
+          onPress={handleContinue}
+        >
           <Text style={styles.continueText}>Continue</Text>
         </TouchableOpacity>
       </View>
@@ -114,6 +115,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 12,
   },
+  emptyContainer: {
+  paddingTop: 24,
+  alignItems: 'center',
+},
+emptyText: {
+  color: '#FFFFFF',
+  fontSize: 18,
+  fontWeight: '700',
+  marginBottom: 4,
+},
+emptyTextSmall: {
+  color: '#E0F4F3',
+  fontSize: 14,
+},
   headerTitle: {
     fontSize: 28,
     fontWeight: '700',
@@ -126,7 +141,7 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   listContent: {
-    paddingBottom: 16, 
+    paddingBottom: 16,
   },
   card: {
     flexDirection: 'row',
@@ -151,7 +166,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   cardPrice: {
-    fontSize: 1,
+    fontSize: 16,
     fontWeight: '700',
   },
   removeButton: {
