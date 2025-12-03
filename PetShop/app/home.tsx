@@ -29,7 +29,6 @@ const getImageForSpecies = (species: string): string => {
   const s = species.toLowerCase();
 
   if (s.includes('fish')) {
-    // Fish-specific image
     return 'https://images.pexels.com/photos/128756/pexels-photo-128756.jpeg?auto=compress&cs=tinysrgb&w=800';
   }
 

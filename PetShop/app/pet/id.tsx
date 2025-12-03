@@ -107,7 +107,6 @@ export default function PetDetailsScreen() {
 
   return (
     <View style={styles.screen}>
-      {/* HEADER */}
       <View style={styles.headerRow}>
         <TouchableOpacity
           onPress={() => router.back()}
@@ -134,12 +133,10 @@ export default function PetDetailsScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* IMAGE CARD */}
           <View style={styles.imageCard}>
             <Image source={{ uri: imageUrl }} style={styles.image} />
           </View>
 
-          {/* NAME + SPECIES + PRICE */}
           <View style={styles.titleRow}>
             <View>
               <Text style={styles.name}>{name}</Text>
@@ -150,7 +147,6 @@ export default function PetDetailsScreen() {
             )}
           </View>
 
-          {/* DETAILS FROM SCHEMA */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Details</Text>
 
@@ -175,13 +171,11 @@ export default function PetDetailsScreen() {
             </View>
           </View>
 
-          {/* DESCRIPTION */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Description</Text>
             <Text style={styles.sectionText}>{description}</Text>
           </View>
 
-          {/* HEALTH INFO */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Health Info</Text>
             <Text style={styles.sectionText}>{healthInfo}</Text>
