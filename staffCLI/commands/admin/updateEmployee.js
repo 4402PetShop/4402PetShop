@@ -135,6 +135,6 @@ const updateEmployeeAction = async (session, employeeID, field, value) => {
 export default {
   name: "update-employee",
   description:
-    "Used to update the name, mobile, email, password, address, salary, role, or routing number for an employee.",
+    "Edit employee fields.",
   action: updateEmployeeAction,
 };
