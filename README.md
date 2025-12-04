@@ -72,6 +72,14 @@ node --import dotenv ./StaffCLI/index.js login pgpwidu4@example.com S5VKLlQmO
 logout           - End the current session
 help             - Show all commands
 update-pet       - Edit pet attributes
+search-orders   - Retrieves order records matching multiple criteria.
+view-order      - Retrieves and displays the full record for a single order ID.
+search-customers - Retrieves customer records matching multiple criteria.
+view-customer   - Retrieves and displays the full record for a single customer ID.
+add-pet         - Add a new pet record to the database.
+delete-pet      - Used to delete a pet record from the database.
+search-pets     - Retrieves pet records matching a field/value criteria.
+view-pet        - Retrieves and displays the full record for a single pet ID.
 sell-pet         - Record a sale/adoption and update status
 add-employee     - Adds a new employee into the database and prints out their employeeID afterwards
 update-employee  - Edit employee fields (name, email, salary, etc.)
@@ -132,4 +140,5 @@ FROM pet
 ORDER BY adoptionfee DESC
 LIMIT 1;
 ```
+
 
