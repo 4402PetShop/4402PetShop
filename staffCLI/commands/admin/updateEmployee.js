@@ -61,13 +61,11 @@ const updateEmployeeAction = async (session, employeeID, field, value) => {
         console.error(`Error: Invalid Password`);
         return;
       }
-      let newString = stringValue.replace(/_/g," ");
-      console.log(newString);
-      finalValue = newString;
+      finalValue = stringValue;
       break;
     case "password":
       const stringPassword = value;
-      if (stringValue.toString().length < 0) {
+      if (stringPassword.toString().length < 0) {
         console.error(`Error: Invalid Password`);
         return;
       }
@@ -91,6 +89,7 @@ const updateEmployeeAction = async (session, employeeID, field, value) => {
         );
         break;
       }
+      finalValue = value;
       break;
     case "routingnumber":
       const stringRoutingNumber = parseInt(value);
@@ -135,6 +134,6 @@ const updateEmployeeAction = async (session, employeeID, field, value) => {
 export default {
   name: "update-employee",
   description:
-    "Used to update the name, mobile, email, password, address, salary, role, or routing number for an employee.",
+    "Edit employee fields.",
   action: updateEmployeeAction,
 };
