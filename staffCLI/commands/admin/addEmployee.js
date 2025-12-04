@@ -11,7 +11,7 @@ const addEmployeeAction = async (
   const supabaseClient = getSupabaseServiceRoleClient();
 
 
-      if (!email || !name || !password || !role || routingnumber) {
+      if (!email || !name || !password || !role || !routingnumber) {
         console.log("Usage: add-employee <email> <name> <password> <role> <routingnumber>");
         return;
     }
