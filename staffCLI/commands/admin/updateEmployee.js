@@ -57,7 +57,6 @@ const updateEmployeeAction = async (session, employeeID, field, value) => {
     case "name":
     case "address":
       const stringValue = value.toString();
-      console.log(value);
       if (stringValue.length < 0) {
         console.error(`Error: Invalid Password`);
         return;
@@ -68,7 +67,6 @@ const updateEmployeeAction = async (session, employeeID, field, value) => {
       break;
     case "password":
       const stringPassword = value;
-      console.stringPassword(value);
       if (stringValue.toString().length < 0) {
         console.error(`Error: Invalid Password`);
         return;
