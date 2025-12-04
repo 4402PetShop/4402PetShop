@@ -73,14 +73,16 @@ logout           - End the current session
 help             - Show all commands
 update-pet       - Edit pet attributes
 sell-pet         - Record a sale/adoption and update status
+add-employee     - Adds a new employee into the database and prints out their employeeID afterwards
 update-employee  - Edit employee fields (name, email, salary, etc.)
+remove-employee  - Removes employee using their employeeID
 ```
 
 ### Important Notes
-If updating an employee's name or address, replace spaces with underscores:
-
+When inputing an employee's name or address, replace spaces with underscores:
 ```
 update-employee 71599737 name Johnny_Brooks
+add-employee testing@testing.com William_Gates BillLovesApples! employee 123456789
 ```
 
 ---
@@ -92,3 +94,4 @@ Myles Guidry
 Gerald Hebert  
 Bella Frederick  
 Jessica Chan
+
